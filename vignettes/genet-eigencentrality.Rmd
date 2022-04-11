@@ -1,0 +1,81 @@
+---
+title: "Generating networks with target eigencentrality via `genet`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{genet-eigencentrality}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette, we show how to generate graphs with an overlapping community structure and a target eigencentrality sequence. We draw the target eigencentrality sequence from a power-law distribution; however, users can input any custom target sequence.
+
+```{r setup}
+library(genet)
+```
+
+First, we set set the number of communities `K` and types `L`, and fix a target community structure. Depending on the application of interest, users can input their custom community structure. Here, for simplicity, we will generate a balanced structure via the `generate_balanced_assignments` function. This function randomly assigns each type to `K_each` communities such that: no types have identical assignments; all communities have at least one type; and the resulting graph of type-to-type interactions is connected.
+
+```{r}
+K <- 100
+L <- 200
+Z <- generate_balanced_assignments(K, L, K_each = 5)
+```
+
+Next, we draw the target degree centrality sequence from a power-law degree sequence with the following parameters:
+
+```{r}
+x_min <- 0.001
+x_max <- 1
+alpha <- 1.5
+```
+
+We set the minimum and maximum eigencentrality to `r x_min` and `r x_max`, and the power law's exponent to `r alpha`. To more closely reproduce the power-law distribution, we set the target eigencentralities equal to the $(L + 1)$-quantiles of the distribution and then adjust the type cardinalities so that the empirical distribution complies with the power law.
+
+```{r, warning = FALSE}
+target_eigenc <- qpower_law(seq(0, 1, length.out = L), alpha, x_min, x_max, 
+                            step = 0.001)
+probs <- dpower_law(target_eigenc, alpha, x_min, x_max, step = 0.001)
+ratios <- probs / min(probs)
+cards <- round(ratios * 2)
+```
+
+Note that we can control the network sparsity through the average expected degree, which can be set via the `target_degree` argument. We can now generate a random network.
+
+```{r}
+g <- genet(1, Z, cards, dc = F, target_centrality = target_eigenc,
+           target_degree = 20)[[1]]
+```
+
+The output of `genet` is a list of `igraph` graph objects.
+
+```{r}
+igraph::vcount(g)
+igraph::ecount(g)
+```
+
+We can then use the `igraph::eigen_centrality` function to extract the empirical eigencentrality distribution of the graph. 
+
+```{r}
+eigenc_distr <- round(igraph::eigen_centrality(g, scale = T)$vector, digits = 3)
+```
+
+The resulting empirical distribution is plotted below.
+
+```{r, echo = FALSE}
+# degree_distr <- degree_distr[degree_distr != 0]
+eigenc_distr <- table(eigenc_distr)
+eigencs <- as.numeric(names(eigenc_distr))
+counts <-  as.numeric(eigenc_distr)
+max_e <- max(eigencs)
+
+plot(log(eigencs, base = 10), counts,
+     ylab = "number of nodes", xlab = "eigencentrality (log10)", pch = 16,
+     cex = .7)
+```

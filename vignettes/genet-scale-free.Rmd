@@ -1,0 +1,100 @@
+---
+title: "Generating scale-free networks via `genet`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{genet-scale-free}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette, we show how to generate graphs with an overlapping community structure and a target degree sequence drawn from a power-law distribution.
+
+```{r setup}
+library(genet)
+```
+
+First, we set set the number of communities `K` and types `L`, and fix a target community structure. Depending on the application of interest, users can input their custom community structure. Here, for simplicity, we will generate a balanced structure via the `generate_balanced_assignments` function. This function randomly assigns each type to `K_each` communities such that: no types have identical assignments; all communities have at least one type; and the resulting graph of type-to-type interactions is connected.
+
+```{r}
+K <- 100
+L <- 200
+Z <- generate_balanced_assignments(K, L, K_each = 5)
+```
+
+Next, we draw the target degree centrality sequence from a power-law degree sequence with the following parameters:
+
+```{r}
+d_min <- 3
+d_max <- 500
+alpha <- 1.937
+```
+
+We set the minimum and maximum degree to `r d_min` and `r d_max`, and the power law's exponent to `r alpha` so that the expected degree is approximately 15.
+
+```{r}
+as.numeric(dpower_law(3:500, alpha, d_min, d_max)  %*% 3:500)
+```
+
+To more closely reproduce the power-law distribution, we set the target degrees equal to the $(L + 1)$-quantiles of the distribution and then adjust the type cardinalities so that the empirical distribution complies with the power law.
+
+```{r, warning = FALSE}
+target_degrees <- qpower_law(seq(0, 1, length.out = L), alpha, d_min, d_max)
+probs <- dpower_law(target_degrees, alpha, d_min, d_max)
+ratios <- probs / min(probs)
+cards <- round(ratios * 2)
+```
+
+We can now generate a random network.
+
+```{r}
+g <- genet(1, Z, cards, dc = T, target_centrality = target_degrees)[[1]]
+```
+
+The output of `genet` is a list of `igraph` graph objects. 
+
+```{r}
+igraph::vcount(g)
+igraph::ecount(g)
+```
+
+We can use the `igraph::degree` function to extract the empirical degree distribution of the graph. 
+
+```{r}
+degree_distr <- table(igraph::degree(g))
+```
+
+The resulting empirical distribution is plotted below. 
+
+```{r, echo = FALSE}
+degree_distr <- degree_distr[degree_distr != 0]
+degrees <- as.numeric(names(degree_distr))
+counts <-  as.numeric(degree_distr)
+max_d <- max(degrees)
+
+compute_ticks <- function(x) {
+  ticks <- (1:9) * 10 ^ x
+  return(ticks[ticks <= max_d])
+}
+
+compute_labels <- function(ticks) {
+  labs <- ticks
+  labs[!labs %in% (10 ^ (0:5))] <- NA
+  labs[1] <- 1
+  labs[length(ticks)] <- ticks[length(ticks)]
+  return(labs)
+}
+
+ticks <- unlist(sapply(0:5, compute_ticks))
+labs <- compute_labels(ticks)
+plot(log(degrees, base = 10), counts,
+     ylab = "number of nodes", xlab = "degree", xaxt="n", pch = 16, cex = .7)
+axis(side = 1, at = log(ticks, base = 10), labels = FALSE)
+text(x = log(ticks, base = 10),  par("usr")[3], labels = labs, pos = 1, xpd = T)
+```

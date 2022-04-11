@@ -1,0 +1,33 @@
+Package: genet
+Type: Package
+Title: Generate Networks with Target Centrality and Community Structure
+Version: 0.1.0
+Authors@R: c(
+  person("Alessandro Antonio", "Grande", 
+  email = "alessandro.grande@columbia.edu",
+  role = c("aut", "cre")),
+  person("Yang", "Feng", email = "yang.feng@nyu.edu",role = c("aut")))
+Maintainer: The package maintainer <alessandro.grande@columbia.edu>
+Description: A graph generator that reproduces networks with overlapping 
+    community structure and target node centralities. Users can specify an 
+    arbitraty degree centrality or eigencentrality sequence. The generative 
+    model is based on the random graph model by Ball, Karrer, and Newman (2011).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    igraph,
+    Matrix,
+    methods,
+    Rcpp,
+    RcppEigen
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.1.2
+LinkingTo: 
+    Rcpp,
+    RcppEigen
+VignetteBuilder: knitr
