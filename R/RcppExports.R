@@ -25,6 +25,14 @@ MNR <- function(interactions, root_ini, target, eps = 10^(-5), verbose = FALSE, 
     .Call(`_genet_MNR`, interactions, root_ini, target, eps, verbose, max_ite)
 }
 
+add_edges <- function(edge_list, last_edge, n_edges, endpoints) {
+    invisible(.Call(`_genet_add_edges`, edge_list, last_edge, n_edges, endpoints))
+}
+
+sample_endpoints <- function(i, j, n_edges, cards, leaders) {
+    .Call(`_genet_sample_endpoints`, i, j, n_edges, cards, leaders)
+}
+
 rBKN <- function(cards, H, root, verbose = FALSE, way_too_verbose = FALSE) {
     .Call(`_genet_rBKN`, cards, H, root, verbose, way_too_verbose)
 }

@@ -81,6 +81,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// add_edges
+void add_edges(MatrixXi& edge_list, R_xlen_t last_edge, int n_edges, MatrixXi& endpoints);
+RcppExport SEXP _genet_add_edges(SEXP edge_listSEXP, SEXP last_edgeSEXP, SEXP n_edgesSEXP, SEXP endpointsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< MatrixXi& >::type edge_list(edge_listSEXP);
+    Rcpp::traits::input_parameter< R_xlen_t >::type last_edge(last_edgeSEXP);
+    Rcpp::traits::input_parameter< int >::type n_edges(n_edgesSEXP);
+    Rcpp::traits::input_parameter< MatrixXi& >::type endpoints(endpointsSEXP);
+    add_edges(edge_list, last_edge, n_edges, endpoints);
+    return R_NilValue;
+END_RCPP
+}
+// sample_endpoints
+MatrixXi sample_endpoints(int i, int j, int n_edges, VectorXi& cards, VectorXi& leaders);
+RcppExport SEXP _genet_sample_endpoints(SEXP iSEXP, SEXP jSEXP, SEXP n_edgesSEXP, SEXP cardsSEXP, SEXP leadersSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< int >::type n_edges(n_edgesSEXP);
+    Rcpp::traits::input_parameter< VectorXi& >::type cards(cardsSEXP);
+    Rcpp::traits::input_parameter< VectorXi& >::type leaders(leadersSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_endpoints(i, j, n_edges, cards, leaders));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rBKN
 SEXP rBKN(VectorXi cards, const MSpMat H, const VectorXd root, bool verbose, bool way_too_verbose);
 RcppExport SEXP _genet_rBKN(SEXP cardsSEXP, SEXP HSEXP, SEXP rootSEXP, SEXP verboseSEXP, SEXP way_too_verboseSEXP) {
@@ -103,6 +131,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_genet_update_J_and_f", (DL_FUNC) &_genet_update_J_and_f, 5},
     {"_genet_check_convergence", (DL_FUNC) &_genet_check_convergence, 4},
     {"_genet_MNR", (DL_FUNC) &_genet_MNR, 6},
+    {"_genet_add_edges", (DL_FUNC) &_genet_add_edges, 4},
+    {"_genet_sample_endpoints", (DL_FUNC) &_genet_sample_endpoints, 5},
     {"_genet_rBKN", (DL_FUNC) &_genet_rBKN, 5},
     {NULL, NULL, 0}
 };

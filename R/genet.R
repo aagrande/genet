@@ -60,6 +60,24 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' \code{return_root = TRUE}, a list with:
 #' \item{graphs}{a list with \code{n} \code{igraph} graph objects;}
 #' \item{root}{a vector with the degree correction terms.}
+#' 
+#' @examples
+#'assignments <- Matrix::sparseMatrix(i = c(1, 2, 3, 3, 3),
+#' j = c(1, 2, 1, 2, 3),
+#' x = c(1, 1, 1, 2, 1))
+#' row_norms <- apply(assignments, 1, function(x) sqrt(sum(x ^ 2)))
+#' assignments <- Matrix::diag(row_norms ^ -1) %*% assignments
+#' 
+#' cards <- c(4, 4, 6)
+#' 
+#' target_degree <- c(4, 6, 10)
+#' 
+#' g <- genet(n = 4, multiedges = F, assignments = assignments, cards = cards, dc = T,
+#'            target_centrality = target_degree)
+#'            
+#' par(mfrow = c(2, 2), mar = rep(0, 4))
+#' invisible(lapply(X = g, FUN = igraph::plot.igraph, vertex.size = 4,
+#'                  vertex.label = NA, vertex.color = "blue", edge.arrow.mode = 0))
 #'
 #' @export
 genet <- function(n, multiedges = T, assignments, cards, dc = TRUE, 
