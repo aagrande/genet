@@ -69,7 +69,6 @@ eigenc_distr <- round(igraph::eigen_centrality(g, scale = T)$vector, digits = 3)
 The resulting empirical distribution is plotted below.
 
 ```{r, echo = FALSE}
-# degree_distr <- degree_distr[degree_distr != 0]
 eigenc_distr <- table(eigenc_distr)
 eigencs <- as.numeric(names(eigenc_distr))
 counts <-  as.numeric(eigenc_distr)
