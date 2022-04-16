@@ -57,7 +57,7 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' to have unit norm.
 #'
 #' @return A list with \code{n} \code{igraph} graph objects. If 
-#' \code{return_root = TRUE}, a list with:
+#' \code{return_root = TRUE}, a list with the following two objects:
 #' \item{graphs}{a list with \code{n} \code{igraph} graph objects;}
 #' \item{root}{a vector with the degree correction terms.}
 #' 
@@ -117,8 +117,7 @@ genet <- function(n, multiedges = T, assignments, cards, dc = TRUE,
   out <- rBKN_wrapper(n, cards, H, root, verbose, F)
   if (!multiedges) out <- lapply(out, igraph::simplify)
   if (return_root) {
-    names(out) <- "graphs"
-    out$root <- root
+    out <- list(graphs = out, root = root)
   }
   return(out)
 }

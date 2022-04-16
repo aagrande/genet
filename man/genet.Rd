@@ -41,7 +41,7 @@ required only when generating networks with target eigencentrality (i.e.
 }
 \value{
 A list with \code{n} \code{igraph} graph objects. If 
-\code{return_root = TRUE}, a list with:
+\code{return_root = TRUE}, a list with the following two objects:
 \item{graphs}{a list with \code{n} \code{igraph} graph objects;}
 \item{root}{a vector with the degree correction terms.}
 }
