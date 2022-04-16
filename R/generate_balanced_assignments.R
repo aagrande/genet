@@ -1,9 +1,11 @@
-#' Generate balanced interactions
+#' Generate balanced assignments
 #'
-#' @param K number of communities
-#' @param L number of types
-#' @param K_each number of communities each type should be assigned to
-#' @param max_ite number of maximum attempts to generate assignments
+#' @param K number of communities.
+#' @param L number of types.
+#' @param K_each number of communities each type is assigned to. If 
+#' \code{K_each = NA}, this number is set to the minimum between \code{K - 1} and
+#' \code{round(max(K / L, L / K))}.
+#' @param max_ite number of maximum attempts to generate assignments.
 #'
 #' @return A L-by-K sparse matrix of type community assignments.
 #' @export
