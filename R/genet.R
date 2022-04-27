@@ -40,7 +40,6 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' Generate networks with overlapping communities and target node centralities.
 #'
 #' @param n number of random networks to generate.
-#' @param multiedges logical. If \code{FALSE}, omit multiedges.
 #' @param assignments matrix with non-negative entries and whose rows encode the
 #'  membership assignments of types.
 #' @param cards vector of type cardinalities. Must be whole numbers.
@@ -50,6 +49,7 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' @param target_degree target average expected degree. This argument is
 #'   required only when generating networks with target eigencentrality (i.e.
 #'   \code{dc = FALSE}).
+#' @param multiedges logical. If \code{FALSE}, omit multiedges.
 #' @param verbose logical. If \code{TRUE}, give verbose output.
 #' @param return_root logical. Should the degree correction terms be returned?
 #'
@@ -72,17 +72,17 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' 
 #' target_degree <- c(4, 6, 10)
 #' 
-#' g <- genet(n = 4, multiedges = F, assignments = assignments, cards = cards, dc = T,
-#'            target_centrality = target_degree)
+#' g <- genet(n = 4, assignments = assignments, cards = cards, dc = T,
+#'            target_centrality = target_degree, multiedges = F)
 #'            
 #' par(mfrow = c(2, 2), mar = rep(0, 4))
 #' invisible(lapply(X = g, FUN = igraph::plot.igraph, vertex.size = 4,
 #'                  vertex.label = NA, vertex.color = "blue", edge.arrow.mode = 0))
 #'
 #' @export
-genet <- function(n, multiedges = T, assignments, cards, dc = TRUE, 
-                  target_centrality, target_degree = NA, verbose = FALSE,
-                  return_root = FALSE) {
+genet <- function(n, assignments, cards, dc = TRUE, 
+                  target_centrality, target_degree = NA, multiedges = T, 
+                  verbose = FALSE, return_root = FALSE) {
   if (!requireNamespace("Matrix", quietly = TRUE)) {
     stop(
       "Package \"Matrix\" must be installed to use this function.",

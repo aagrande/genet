@@ -54,7 +54,7 @@ cards <- round(ratios * 2)
 We can now generate a random network.
 
 ```{r}
-g <- genet(1, Z, cards, dc = T, target_centrality = target_degrees)[[1]]
+g <- genet(1, Z, cards, multiedges = T, dc = T, target_centrality = target_degrees)[[1]]
 ```
 
 The output of `genet` is a list of `igraph` graph objects. 

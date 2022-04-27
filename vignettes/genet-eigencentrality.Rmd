@@ -50,7 +50,7 @@ Note that we can control the network sparsity through the average expected degre
 
 ```{r}
 g <- genet(1, Z, cards, dc = F, target_centrality = target_eigenc,
-           target_degree = 20)[[1]]
+           target_degree = 20, multiedges = T)[[1]]
 ```
 
 The output of `genet` is a list of `igraph` graph objects.
