@@ -6,20 +6,19 @@
 \usage{
 genet(
   n,
-  multiedges = T,
   assignments,
   cards,
   dc = TRUE,
   target_centrality,
   target_degree = NA,
+  multiedges = TRUE,
   verbose = FALSE,
-  return_root = FALSE
+  return_root = FALSE,
+  timer_on = FALSE
 )
 }
 \arguments{
 \item{n}{number of random networks to generate.}
-
-\item{multiedges}{logical. If \code{FALSE}, omit multiedges.}
 
 \item{assignments}{matrix with non-negative entries and whose rows encode the
 membership assignments of types.}
@@ -35,15 +34,23 @@ centrality; if \code{FALSE}, generate networks with target eigencentrality.}
 required only when generating networks with target eigencentrality (i.e.
 \code{dc = FALSE}).}
 
+\item{multiedges}{logical. If \code{FALSE}, omit multiedges.}
+
 \item{verbose}{logical. If \code{TRUE}, give verbose output.}
 
 \item{return_root}{logical. Should the degree correction terms be returned?}
+
+\item{timer_on}{logical. Should the runtime of the MNR and edge generation 
+step be returned?}
 }
 \value{
 A list with \code{n} \code{igraph} graph objects. If 
-\code{return_root = TRUE}, a list with the following two objects:
+\code{return_root = TRUE} or \code{timer_on = TRUE}, a list with the 
+following objects:
 \item{graphs}{a list with \code{n} \code{igraph} graph objects;}
-\item{root}{a vector with the degree correction terms.}
+\item{root}{a vector with the degree correction terms;}
+\item{timer}{a vector with the runtime in seconds of the MNR and graph 
+generation steps.}
 }
 \description{
 Generate networks with overlapping communities and target node centralities.
@@ -63,8 +70,8 @@ cards <- c(4, 4, 6)
 
 target_degree <- c(4, 6, 10)
 
-g <- genet(n = 4, multiedges = F, assignments = assignments, cards = cards, dc = T,
-           target_centrality = target_degree)
+g <- genet(n = 4, assignments = assignments, cards = cards, dc = TRUE,
+           target_centrality = target_degree, multiedges = FALSE)
            
 par(mfrow = c(2, 2), mar = rep(0, 4))
 invisible(lapply(X = g, FUN = igraph::plot.igraph, vertex.size = 4,

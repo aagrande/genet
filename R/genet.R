@@ -1,5 +1,5 @@
-rBKN_wrapper <- function(n, cards, H, root, verbose = T, way_too_verbose = F,
-                         parallel = F) {
+rBKN_wrapper <- function(n, cards, H, root, verbose = TRUE, 
+                         way_too_verbose = FALSE, parallel = FALSE) {
   if (!methods::is(H, "dgCMatrix")) stop("H is not a dgCMatrix")
   if (parallel & !requireNamespace("parallel", quietly = TRUE)) {
     warning("Package \"parallel\" must be installed to generate networks
@@ -15,7 +15,7 @@ rBKN_wrapper <- function(n, cards, H, root, verbose = T, way_too_verbose = F,
     graphs <- lapply(null_list,
                      function(x) rBKN(cards, H, root, verbose, way_too_verbose))
   }
-  # note that the vertices max(x) + 1, ..., sum(cards) may be missing
+  # add isolated vertices if any
   n_vertices_to_add <- sum(cards) - sapply(graphs, function(x) max(x))
   graphs <- lapply(graphs, igraph::graph_from_edgelist, directed = FALSE)
   if (any(n_vertices_to_add > 0)) {
@@ -52,14 +52,19 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' @param multiedges logical. If \code{FALSE}, omit multiedges.
 #' @param verbose logical. If \code{TRUE}, give verbose output.
 #' @param return_root logical. Should the degree correction terms be returned?
-#'
+#' @param timer_on logical. Should the runtime of the MNR and edge generation 
+#' step be returned?
+#' 
 #' @details The rows of the matrix argument `assignments` are normalized so as
 #' to have unit norm.
 #'
 #' @return A list with \code{n} \code{igraph} graph objects. If 
-#' \code{return_root = TRUE}, a list with the following two objects:
+#' \code{return_root = TRUE} or \code{timer_on = TRUE}, a list with the 
+#' following objects:
 #' \item{graphs}{a list with \code{n} \code{igraph} graph objects;}
-#' \item{root}{a vector with the degree correction terms.}
+#' \item{root}{a vector with the degree correction terms;}
+#' \item{timer}{a vector with the runtime in seconds of the MNR and graph 
+#' generation steps.}
 #' 
 #' @examples
 #'assignments <- Matrix::sparseMatrix(i = c(1, 2, 3, 3, 3),
@@ -72,8 +77,8 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #' 
 #' target_degree <- c(4, 6, 10)
 #' 
-#' g <- genet(n = 4, assignments = assignments, cards = cards, dc = T,
-#'            target_centrality = target_degree, multiedges = F)
+#' g <- genet(n = 4, assignments = assignments, cards = cards, dc = TRUE,
+#'            target_centrality = target_degree, multiedges = FALSE)
 #'            
 #' par(mfrow = c(2, 2), mar = rep(0, 4))
 #' invisible(lapply(X = g, FUN = igraph::plot.igraph, vertex.size = 4,
@@ -81,8 +86,8 @@ compute_expected_degrees <- function(root, interactions, target_eigenc = NA) {
 #'
 #' @export
 genet <- function(n, assignments, cards, dc = TRUE, 
-                  target_centrality, target_degree = NA, multiedges = T, 
-                  verbose = FALSE, return_root = FALSE) {
+                  target_centrality, target_degree = NA, multiedges = TRUE, 
+                  verbose = FALSE, return_root = FALSE, timer_on = FALSE) {
   if (!requireNamespace("Matrix", quietly = TRUE)) {
     stop(
       "Package \"Matrix\" must be installed to use this function.",
@@ -101,8 +106,12 @@ genet <- function(n, assignments, cards, dc = TRUE,
                                             function(x) sqrt(sum(x^2))^(-1))) %*%
     assignments
   H <- assignments %*% Matrix::t(assignments)
+  if (timer_on) {
+    tic <- Sys.time()
+    timer <- list(MNR = c(tic, tic), EG = c(tic, tic))
+  }
   interactions <- compute_weighted_interactions(H, cards, dc, target_centrality)
-  theta_ini <- initialize_root(interactions, target_centrality) # runif(L)
+  theta_ini <- initialize_root(interactions, target_centrality)
   root <- MNR(interactions, theta_ini, target_centrality, verbose = verbose)
   if (!dc) { # rescale root to comply with target average degree
     if (is.na(target_degree[1])) {
@@ -114,10 +123,23 @@ genet <- function(n, assignments, cards, dc = TRUE,
                                            target_centrality)) / sum(cards)
     root <- root * sqrt(target_degree / avg_expected_degree)
   }
-  out <- rBKN_wrapper(n, cards, H, root, verbose, F)
+  if (timer_on) {
+    timer$MNR[2] <- Sys.time()
+    timer$EG[1] <- Sys.time()
+  }
+  out <- rBKN_wrapper(n, cards, H, root, verbose, FALSE)
   if (!multiedges) out <- lapply(out, igraph::simplify)
-  if (return_root) {
-    out <- list(graphs = out, root = root)
+  if (timer_on) {
+    timer$EG[2] <- Sys.time()
+  }
+  if (return_root | timer_on) {
+    out <- list(graphs = out)
+    if (return_root) out$root <- root
+    if (timer_on) {
+      out$timer <- sapply(timer, 
+                          function(x) as.numeric(difftime(x[2], x[1], 
+                                                          units = "secs")))
+    }
   }
   return(out)
 }
