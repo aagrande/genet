@@ -2,7 +2,7 @@
 title: "Generating networks with target eigencentrality via `genet`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{genet-eigencentrality}
+  %\VignetteIndexEntry{Generating networks with target eigencentrality via `genet`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -2,7 +2,7 @@
 title: "Generating scale-free networks via `genet`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{genet-scale-free}
+  %\VignetteIndexEntry{Generating scale-free networks via `genet`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
